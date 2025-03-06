@@ -1,0 +1,15 @@
+{# templates/interfaces_data.j2 #}
+Interface,Status,IP Address,MAC Address,Description,Bandwidth,Duplex,Type,CRC Information
+{% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+"{{ name }}","{{ interface.operstatus }}","{{ interface.ipv4[0].address if interface.ipv4 is defined and interface.ipv4|length > 0 else 'N/A' }}","{{ interface.macaddress if interface.macaddress is defined else 'N/A' }}","{{ interface.description if interface.description is defined else '' }}","{{ interface.bandwidth if interface.bandwidth is defined else 'N/A' }}","{{ interface.duplex if interface.duplex is defined else 'N/A' }}","{{ interface.type if interface.type is defined else 'N/A' }}",
+{% if crc_info %}
+  {% set crc_lines = crc_info.split('\n') %}
+  {% for crc in crc_lines %}
+    {% if name in crc %}
+      "{{ crc.split(': ')[1] }}"  # Extract the CRC value for the corresponding interface
+    {% endif %}
+  {% endfor %}
+{% else %}
+"N/A"
+{% endif %}
+{% endfor %}

@@ -1,0 +1,86 @@
+---
+- name: Konfigurasi VLAN dan Port Assignment
+  hosts: switch1
+  gather_facts: no
+  connection: network_cli
+  collections:
+  - cisco.ios
+  vars:
+    vlan_10_ip: "192.168.10.10"
+    vlan_10_subnet: "255.255.255.0"
+    vlan_100_ip: "192.168.100.10"
+    vlan_100_subnet: "255.255.255.0"
+  vars_files:
+   - /home/switch_mining/ansible/vault.yaml
+
+  tasks:
+    - name: Debug connection variables
+      debug:
+        msg:
+          - "ansible_host: {{ ansible_host }}"
+          - "ansible_user: {{ ansible_user }}"
+          - "ansible_password: {{ ansible_password }}"
+          - "ansible_connection: {{ ansible_connection }}"
+          - "ansible_network_os: {{ ansible_network_os }}"
+
+    - name: Membuat VLAN 10
+      cisco.ios.ios_config:
+       lines:
+        - vlan 10
+        - name Management
+
+    - name: Membuat VLAN 100
+      cisco.ios.ios_config:
+       lines:
+        - vlan 100
+        - name Front-Office
+
+    - name: Konfigurasi IP Address untuk VLAN 10
+      cisco.ios.ios_config:
+        lines:
+          - ip address {{ vlan_10_ip }} {{ vlan_10_subnet }}
+        parents: interface Vlan10
+
+    - name: Konfigurasi IP Address untuk VLAN 100
+      cisco.ios.ios_config:
+        lines:
+          - ip address {{ vlan_100_ip }} {{ vlan_100_subnet }}
+        parents: interface Vlan100
+
+    - name: debug
+      debug:
+        var: result
+
+    - name: Konfigurasi FastEthernet0/1 - FastEthernet0/15 sebagai switchport
+      cisco.ios.ios_config:
+       lines:
+         - switchport
+         - switchport mode access
+       parents: interface FastEthernet0/{{ item }}
+      loop: "{{ range(1, 16) | list }}"
+
+    - name: debug
+      debug:
+        var: result
+
+    - name: Assign port fa 0/1 - fa 0/15 ke VLAN 10
+      cisco.ios.ios_config:
+        lines:
+          - switchport access vlan 10
+        parents: interface FastEthernet0/{{ item }}
+      loop: "{{ range(1, 16) | list }}"
+
+    - name: Konfigurasi FastEthernet0/16 - FastEthernet0/24 sebagai switchport
+      cisco.ios.ios_config:
+        lines:
+          - switchport
+          - switchport mode access
+        parents: interface FastEthernet0/{{ item }}
+      loop: "{{ range(16, 25) | list }}"
+
+    - name: Assign port fa 0/16 - fa 0/24 ke VLAN 100
+      cisco.ios.ios_config:
+        lines:
+          - switchport access vlan 100
+        parents: interface FastEthernet0/{{ item }}
+      loop: "{{ range(16, 25) | list }}"

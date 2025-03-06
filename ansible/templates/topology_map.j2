@@ -1,0 +1,20 @@
+{# templates/topology_map.j2 #}
+digraph network {
+    label="Network Topology Map";
+    labelloc="t";
+    fontsize=20;
+    
+    node [shape=box, style=filled, fillcolor=lightblue];
+    
+    {% for host in groups['switches'] %}
+    "{{ host }}" [label="{{ host }}\n{{ hostvars[host]['ansible_facts']['ansible_net_model'] if 'ansible_facts' in hostvars[host] }}"];
+    {% endfor %}
+    
+    {% for host in groups['switches'] %}
+    {% if 'cdp' in hostvars[host]['ansible_facts'] and hostvars[host]['ansible_facts']['cdp'] is defined %}
+    {% for neighbor in hostvars[host]['ansible_facts']['cdp'] %}
+    "{{ host }}" -> "{{ neighbor.neighbor }}" [label="{{ neighbor.local_interface }} -> {{ neighbor.neighbor_interface }}"];
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+}

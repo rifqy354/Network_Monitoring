@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansible Web Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: block;
+            width: 100%
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ansible Web Interface</h1>
+
+
+        <div class="section">
+             <h2>SET_IP</h2>
+             <button id="set-ip-button">Run SET_IP Playbook</button>
+             <pre id="set-ip-output"></pre>
+
+
+        <div class="section">
+             <h2>Monitoring</h2>
+             <button id="monitoring-button">Run Monitoring Playbook</button>
+             <pre id="monitoring-output"></pre>
+        </div>
+
+    <script>
+        function runPlaybook(endpoint, outputID) {
+                console.log('Starting playbook execution for ${endpoint}');
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                })
+                .then(response => {
+                     console.log('Response received:' response);
+                     return response.json();
+                 })
+                .then(data => {
+                    console.log('Data received:', data);
+                    const outputDiv = document.getElementById(outputId);
+                    if (data.status === 'success') {
+                        outputDiv.innerHTML = `
+                            STDOUT:<br><pre>${data.stdout}</pre><br>
+                            STDERR:<br><pre>${data.stderr}</pre><br>
+                            <button onclick="runAgain('${endpoint}')">Run Again</button>
+                        `;
+                    } else {
+                        outputDiv.textContent = `Error: ${data.message}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById(outputId).textContent = `Error: ${error}`;
+                });
+            });
+        }
+
+        function runAgain(endpoint, outputID) {
+            // Trigger the form submission again for the specified endpoint
+            runPlaybook(endpoint, outputID);
+        }
+
+        // Initialize the buttons
+          document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded and parsed');
+        document.getElementById('set-ip-button').addEventListener('click', function() {
+            console.log('SET_IP button clicked');
+            runPlaybook('/set-ip', 'set-ip-output');
+        });
+
+        document.getElementById('monitoring-button').addEventListener('click', function() {
+            console.log('Monitoring button clicked');
+            runPlaybook('/monitoring', 'monitoring-output');
+        });
+    });
+    </script>
+</body>
+</html>

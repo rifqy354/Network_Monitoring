@@ -1,0 +1,96 @@
+{# templates/port_status.j2 #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Status - {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .up { color: green; font-weight: bold; }
+        .down { color: red; font-weight: bold; }
+        .admin-down { color: orange; font-weight: bold; }
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                green 0% {{ (up_interfaces / switch_facts.ansible_facts.ansible_net_interfaces | length * 100) | round }}%, 
+                red {{ (up_interfaces / switch_facts.ansible_facts.ansible_net_interfaces | length * 100) | round }}% 100%
+            );
+            position: relative;
+        }
+        .chart::before {
+            content: "{{ up_interfaces }}/{{ switch_facts.ansible_facts.ansible_net_interfaces | length }}";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Port Status for {{ inventory_hostname }}</h1>
+    
+    {% set up_interfaces = 0 %}
+    {% set admin_down_interfaces = 0 %}
+    {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+        {% if interface.operstatus == 'up' %}
+            {% set up_interfaces = up_interfaces + 1 %}
+        {% endif %}
+        {% if interface.lineprotocol == 'administratively down' %}
+            {% set admin_down_interfaces = admin_down_interfaces + 1 %}
+        {% endif %}
+    {% endfor %}
+    
+    <div class="summary">
+        <h2>Status Summary</h2>
+        <p>Total Interfaces: {{ switch_facts.ansible_facts.ansible_net_interfaces | length }}</p>
+        <p>Interfaces Up: {{ up_interfaces }}</p>
+        <p>Interfaces Down: {{ switch_facts.ansible_facts.ansible_net_interfaces | length - up_interfaces }}</p>
+        <p>Administratively Down: {{ admin_down_interfaces }}</p>
+    </div>
+    
+    <div class="chart-container">
+        <div class="chart"></div>
+    </div>
+    
+    <h2>Port Status Details</h2>
+    <table>
+        <tr>
+            <th>Interface</th>
+            <th>Status</th>
+            <th>Line Protocol</th>
+            <th>Last Status Change</th>
+            <th>Speed</th>
+            <th>Duplex</th>
+            <th>Description</th>
+        </tr>
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td class="{{ interface.operstatus }}">{{ interface.operstatus }}</td>
+            <td>{{ interface.lineprotocol }}</td>
+            <td>{{ interface.lastchange if interface.lastchange is defined else 'N/A' }}</td>
+            <td>{{ interface.bandwidth if interface.bandwidth is defined else 'N/A' }}</td>
+            <td>{{ interface.duplex if interface.duplex is defined else 'N/A' }}</td>
+            <td>{{ interface.description if interface.description is defined else '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <footer>
+        <p>Report generated on: {{ timestamp }}</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{# templates/vlan_report.j2 #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VLAN Report - {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .active { color: green; }
+        .inactive { color: red; }
+    </style>
+</head>
+<body>
+    <h1>VLAN Report for {{ inventory_hostname }}</h1>
+    
+    <h2>VLAN Summary</h2>
+    <pre>{{ interface_data.stdout[3] }}</pre>
+    
+    <h2>VLAN to Interface Mapping</h2>
+    <table>
+        <tr>
+            <th>VLAN</th>
+            <th>Interfaces</th>
+        </tr>
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+            {% if interface.vlan is defined %}
+                <tr>
+                    <td>{{ interface.vlan }}</td>
+                    <td>{{ name }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+    
+    <h2>MAC Address Table</h2>
+    <pre>{{ interface_data.stdout[2] }}</pre>
+    
+    <footer>
+        <p>Report generated on: {{ timestamp }}</p>
+    </footer>
+</body>
+</html>

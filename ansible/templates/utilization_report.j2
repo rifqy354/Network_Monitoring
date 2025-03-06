@@ -1,0 +1,69 @@
+{# templates/utilization_report.j2 #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Utilization Report - {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .warning { background-color: #fff3cd; }
+        .critical { background-color: #f8d7da; }
+        .meter {
+            height: 20px;
+            position: relative;
+            background: #f3f3f3;
+            border-radius: 5px;
+            padding: 3px;
+            box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
+        }
+        .meter > span {
+            display: block;
+            height: 100%;
+            border-radius: 5px;
+            background-color: rgb(43,194,83);
+            box-shadow: inset 0 2px 9px rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>Utilization Report for {{ inventory_hostname }}</h1>
+    
+    <h2>CPU Utilization</h2>
+    <pre>{{ interface_data.stdout[8] }}</pre>
+    
+    <h2>Memory Utilization</h2>
+    <pre>{{ interface_data.stdout[9] }}</pre>
+    
+    <h2>Interface Utilization</h2>
+    <table>
+        <tr>
+            <th>Interface</th>
+            <th>Status</th>
+            <th>Input Packets</th>
+            <th>Output Packets</th>
+            <th>Input Errors</th>
+            <th>Output Errors</th>
+        </tr>
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td>{{ interface.operstatus }}</td>
+            <td>{{ interface.counters.rx_unicast_packets if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.tx_unicast_packets if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.rx_errors if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.tx_errors if interface.counters is defined else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <footer>
+        <p>Report generated on: {{ timestamp }}</p>
+    </footer>
+</body>
+</html>

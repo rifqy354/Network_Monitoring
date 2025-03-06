@@ -1,0 +1,71 @@
+{# templates/interface_report.j2 #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interface Report - {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .up { color: green; font-weight: bold; }
+        .down { color: red; font-weight: bold; }
+        .summary { background-color: #eef; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Interface Report for {{ inventory_hostname }}</h1>
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Device Model: {{ switch_facts.ansible_facts.ansible_net_model }}</p>
+        <p>IOS Version: {{ switch_facts.ansible_facts.ansible_net_version }}</p>
+        <p>Total Interfaces: {{ switch_facts.ansible_facts.ansible_net_interfaces | length }}</p>
+        
+        {% set up_interfaces = 0 %}
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+            {% if interface.operstatus == 'up' %}
+                {% set up_interfaces = up_interfaces + 1 %}
+            {% endif %}
+        {% endfor %}
+        
+        <p>Interfaces Up: {{ up_interfaces }}</p>
+        <p>Interfaces Down: {{ switch_facts.ansible_facts.ansible_net_interfaces | length - up_interfaces }}</p>
+    </div>
+
+    <h2>Interface Details</h2>
+    <table>
+        <tr>
+            <th>Interface</th>
+            <th>Status</th>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Description</th>
+            <th>Bandwidth</th>
+            <th>Duplex</th>
+        </tr>
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td class="{{ interface.operstatus }}">{{ interface.operstatus }}</td>
+            <td>{{ interface.ipv4[0].address if interface.ipv4 is defined and interface.ipv4|length > 0 else 'N/A' }}</td>
+            <td>{{ interface.macaddress if interface.macaddress is defined else 'N/A' }}</td>
+            <td>{{ interface.description if interface.description is defined else '' }}</td>
+            <td>{{ interface.bandwidth if interface.bandwidth is defined else 'N/A' }}</td>
+            <td>{{ interface.duplex if interface.duplex is defined else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>VLAN Information</h2>
+    <pre>{{ interface_data.stdout[3] }}</pre>
+
+    <h2>CDP Neighbors</h2>
+    <pre>{{ interface_data.stdout[4] }}</pre>
+
+    <footer>
+        <p>Report generated on: {{ timestamp }}</p>
+    </footer>
+</body>
+</html>

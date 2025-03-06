@@ -1,0 +1,11 @@
+---
+- name: Configure VLAN on Cisco Switch
+  hosts: cisco_switches  # Targetkan grup "cisco_switches" dari inventory
+  gather_facts: no
+  tasks:
+    - name: Configure VLAN 100 on switch
+      cisco.ios.ios_config:  # Gunakan modul dengan namespace yang benar
+        lines:
+          - vlan 10
+          - name Front Office
+        save_when: modified  # Simpan konfigurasi ke NVRAM

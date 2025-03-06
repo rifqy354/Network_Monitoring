@@ -1,0 +1,192 @@
+---
+# File: network_data_collection.yml
+# Description: Playbook untuk mengumpulkan dan menganalisis data dari switch jaringan
+
+- name: Collect and analyze data from network switches
+  hosts: all
+  gather_facts: no
+  vars:
+    # Direktori utama untuk menyimpan data
+    data_directory: "/mnt/d/'Sem 8'/switch_data"
+    # Timestamp untuk direktori unik
+    current_timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
+  vars_files:
+    - vault.yaml  # File untuk menyimpan variabel sensitif seperti credentials
+
+  tasks:
+    # 1. Inisialisasi variabel
+    - name: Initialize variables
+      set_fact:
+        data_directory: "/home/switch_mining/switch_data"
+        current_timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
+        timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
+
+    - name: Debug variables
+      debug:
+        msg:
+         - "Data directory: {{ data_directory }}"
+         - "Current timestamp: {{ current_timestamp }}"
+         - "Timestamp: {{ timestamp }}"
+
+    # 2. Pastikan direktori induk ada
+    - name: Ensure parent directory exists
+      file:
+        path: "{{ data_directory }}"
+        state: directory
+        mode: '0755'
+      vars:
+       ansible_ssh_extra_args: "-o PreferredAuthentications=Password -o PubkeyAuthentication=no"
+       ansible_scp_if_ssh: yes
+
+    - name: Debug directory variables
+      debug:
+        msg:
+        - "Data directory: {{ data_directory }}"
+        - "Current timestamp: {{ current_timestamp }}"
+
+    # 3. Buat direktori dengan timestamp
+    - name: Create timestamped directory
+      file:
+        path: "{{ data_directory }}/{{ current_timestamp }}"
+        state: directory
+        mode: '0755'
+      register: dir_creation
+
+    - name: Debug dir_creation
+      debug:
+        var: dir_creation
+
+    - name: Debug current_timestamp
+      debug:
+        var: current_timestamp
+
+    # 4. Periksa apakah direktori berhasil dibuat
+    - name: Check if directory exists
+      stat:
+        path: "{{ data_directory }}/{{ current_timestamp }}"
+      register: dir_check
+
+    - name: Debug directory existence
+      debug:
+        var: dir_check.stat.exists
+
+    # 5. Gagal jika direktori tidak dibuat
+    - name: Fail if directory creation fails
+      fail:
+        msg: "Failed to create directory {{ data_directory }}/{{ current_timestamp }}. Exists: {{ dir_check.stat.exists }}"
+      when: not dir_check.stat.exists
+
+    # 6. Debug informasi direktori
+    - name: Debug directory path
+      debug:
+        msg: "Data directory is {{ data_directory }}/{{ current_timestamp }}"
+
+    # 7. Kumpulkan fakta dari switch
+    - name: Gather facts from switches
+      cisco.ios.ios_facts:
+        gather_subset:
+          - hardware
+          - interfaces
+          - default
+      register: switch_facts
+
+    - name: Debug collected facts
+      debug:
+        var: switch_facts.ansible_facts
+
+    # 8. Debug model perangkat
+    - name: Debug device model
+      debug:
+        msg: "Device model is {{ switch_facts.ansible_facts.ansible_net_model }}"
+
+    # 9. Aktifkan SNMP agent
+    - name: Enable SNMP agent
+      #cisco.ios.ios_snmp_server:
+      cisco.ios.ios_config:
+       # config:
+        #  communities:
+         #   - name: "PUBLIC"
+          #    ro: true
+           #   acl_v4: "90"
+        #state: merged
+        lines:
+          - snmp-server community PUBLIC RO 90
+
+    # 10. Dapatkan statistik interface termasuk CRC
+    - name: Get interface statistics including CRC
+      cisco.ios.ios_command:
+        commands:
+          - show interfaces | include (up|down|input rate|output rate|input errors|CRC)
+          - show ip interface brief
+          - show mac address-table
+          - show vlan brief
+          - show cdp neighbors detail
+          - show spanning-tree
+          - show version | include (Switch uptime)
+          #- show inventory
+          - show processes cpu
+          - show processes memory
+          #- show logging
+          - show ip arp
+          #- show power
+          #- show etherchannel summary
+      register: interface_data
+
+    # 11. Debug data interface
+    - name: Debug interface data
+      debug:
+        var: interface_data
+
+    # 12. Ekstrak informasi CRC dari output
+    - name: Extract CRC information
+      set_fact:
+       crc_info: >-
+         {% set lines = interface_data.stdout[0].split('\n') %}
+         {% set results = [] %}
+         {% for line in lines %}
+           {% if 'CRC' in line %}
+             {% set interface_line = lines[loop.index0 - 1] %}
+             {% set interface_name = interface_line.split()[0] %}
+             {% set results = results + [interface_name ~ ': '  ~ line.strip()] %}
+           {% endif %}
+         {% endfor %}
+         {{ results | join('\n') }}
+
+    # 13. Debug CRC information
+    - name: Debug CRC information
+      debug:
+        var: crc_info
+
+    # 12. Export data ke file JSON
+    - name: Export raw data to JSON files
+      copy:
+        content: "{{ item.value | to_nice_json }}"
+        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ item.key }}.json"
+      delegate_to: localhost
+      loop:
+        - { key: "facts", value: "{{ switch_facts }}" }
+        - { key: "interface_data", value: "{{ interface_data }}" }
+        - { key: "crc_info", value: "{{ crc_info }}" } #tambahan CRC
+      when: dir_check.stat.exists
+
+    # 13. Buat laporan menggunakan template Jinja2
+    - name: Create interface report
+      template:
+        src: templates/interface_report.j2
+        dest: "{{ data_directory }}/{{ timestamp | default('unknown_timestamp') }}/interface_report.txt"
+      when: dir_check.stat.exists
+
+    # 14. Buat laporan utilitas
+    - name: Create utilization report
+      template:
+        src: templates/utilization_report.j2
+        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ inventory_hostname }}_utilization_report.html"
+      when: dir_check.stat.exists
+
+    # 15. Buat laporan VLAN
+    - name: Create VLAN report
+      template:
+        src: templates/vlan_report.j2
+        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ inventory_hostname }}_vlan_report.html"
+      when: dir_check.stat.exists
+

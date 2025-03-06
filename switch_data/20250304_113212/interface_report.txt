@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interface Report - switch1</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .up { color: green; font-weight: bold; }
+        .down { color: red; font-weight: bold; }
+        .summary { background-color: #eef; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Interface Report for switch1</h1>
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Device Model: WS-C3560-24PS</p>
+        <p>IOS Version: 12.2(55)SE12</p>
+        <p>Total Interfaces: 29</p>
+        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+        <p>Interfaces Up: 0</p>
+        <p>Interfaces Down: 29</p>
+    </div>
+
+    <h2>Interface Details</h2>
+    <table>
+        <tr>
+            <th>Interface</th>
+            <th>Status</th>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Description</th>
+            <th>Bandwidth</th>
+            <th>Duplex</th>
+        </tr>
+                <tr>
+            <td>Vlan1</td>
+            <td class="up">up</td>
+            <td>192.168.2.10</td>
+            <td>001b.d452.f040</td>
+            <td></td>
+            <td>1000000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>Vlan10</td>
+            <td class="up">up</td>
+            <td>192.168.10.10</td>
+            <td>001b.d452.f042</td>
+            <td></td>
+            <td>1000000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>Vlan100</td>
+            <td class="up">up</td>
+            <td>192.168.100.10</td>
+            <td>001b.d452.f043</td>
+            <td></td>
+            <td>1000000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/1</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f003</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/2</td>
+            <td class="up">up</td>
+            <td>N/A</td>
+            <td>001b.d452.f004</td>
+            <td></td>
+            <td>100000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/3</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f005</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/4</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f006</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/5</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f007</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/6</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f008</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/7</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f009</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/8</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00a</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/9</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00b</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/10</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00c</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/11</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00d</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/12</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00e</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/13</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f00f</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/14</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f010</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/15</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f011</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/16</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f012</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/17</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f013</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/18</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f014</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/19</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f015</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/20</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f016</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/21</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f017</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/22</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f018</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/23</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f019</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>FastEthernet0/24</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f01a</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>GigabitEthernet0/1</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f001</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+                <tr>
+            <td>GigabitEthernet0/2</td>
+            <td class="down">down</td>
+            <td>N/A</td>
+            <td>001b.d452.f002</td>
+            <td></td>
+            <td>10000</td>
+            <td></td>
+        </tr>
+            </table>
+
+    <h2>VLAN Information</h2>
+    <pre>VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Gi0/1, Gi0/2
+10   Management                       active    Fa0/1, Fa0/2, Fa0/3, Fa0/4, Fa0/5, Fa0/6, Fa0/7, Fa0/8, Fa0/9, Fa0/10, Fa0/11, Fa0/12, Fa0/13, Fa0/14, Fa0/15
+100  Front-Office                     active    Fa0/16, Fa0/17, Fa0/18, Fa0/19, Fa0/20, Fa0/21, Fa0/22, Fa0/23, Fa0/24
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup</pre>
+
+    <h2>CDP Neighbors</h2>
+    <pre></pre>
+
+    <footer>
+        <p>Report generated on: 20250304_113212</p>
+    </footer>
+</body>
+</html>
