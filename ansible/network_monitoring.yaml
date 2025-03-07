@@ -29,7 +29,7 @@
         dest: "/tmp/command_output"
 
     - name: Ensure unique remote directory exists on SFTP server
-      sftp:
+      community.sftp.sftp:
         dest: "{{ unique_remote_dir }}"
         host: "{{ sftp_host }}"
         username: "{{ sftp_user }}"
@@ -39,7 +39,7 @@
 
    #00. Tes koneksi SFTP
     - name: Send dummy file
-      sftp:
+      community.sftp.sftp:
         src: "/tmp/command_output.txt"
         dest: "{{ unique_remote_dir }}/command_output.txt"
         host: "{{ sftp_host }}"
