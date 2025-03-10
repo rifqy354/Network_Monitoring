@@ -13,7 +13,7 @@
   vars_files:
     - vault.yaml  # File untuk menyimpan variabel sensitif seperti credentials
 
-  #tasks:
+  tasks:
    # - name: Run a command and capture output
     #  command: uptime
      # register: command_output
@@ -53,7 +53,6 @@
     # 1. Inisialisasi variabel
     - name: Initialize variables
       set_fact:
-        current_timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
         timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
 
     - name: Debug variables
