@@ -68,13 +68,12 @@
         path: "{{ data_directory }}"
         state: directory
         mode: '0755'
-      vars:
-       ansible_ssh_extra_args: "-o PreferredAuthentications=Password -o PubkeyAuthentication=no"
-       ansible_scp_if_ssh: yes
+      register: parent_dir_creation
 
     - name: Debug directory variables
       debug:
         msg:
+        - "Parent directory creation: {{ parent_dir_creation }}"
         - "Data directory: {{ data_directory }}"
         - "Current timestamp: {{ current_timestamp }}"
 
@@ -93,6 +92,12 @@
     - name: Debug current_timestamp
       debug:
         var: current_timestamp
+
+    - name: Debug timestamped directory
+      debug:
+        msg:
+         - "Timestamped directory creation result: {{ dir_creation }}"
+         - "Timestamped directory path: {{ data_directory }}/{{ current_timestamped }}"
 
     # 4. Periksa apakah direktori berhasil dibuat
     - name: Check if directory exists
