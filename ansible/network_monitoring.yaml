@@ -97,7 +97,7 @@
       debug:
         msg:
          - "Timestamped directory creation result: {{ dir_creation }}"
-         - "Timestamped directory path: {{ data_directory }}/{{ current_timestamped }}"
+         - "Timestamped directory path: {{ data_directory }}/{{ current_timestamp }}"
 
     # 4. Periksa apakah direktori berhasil dibuat
     - name: Check if directory exists
