@@ -40,6 +40,7 @@
        state: directory
        mode: '0755'
       become: yes
+      become_user: semaphor
 
     - name: Debug directory variables
       debug:
