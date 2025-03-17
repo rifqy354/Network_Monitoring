@@ -34,6 +34,13 @@
         mode: '0755'
       register: parent_dir_creation
 
+    - name: Ensure output dir exists
+      file:
+       path: {{ data_directory }}/{{ timestamp }}
+       state: directory
+       mode: '0755'
+      become: yes
+
     - name: Debug directory variables
       debug:
         msg:
