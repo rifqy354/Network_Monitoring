@@ -36,18 +36,11 @@
 
     - name: Ensure output dir exists
       file:
-       path: /mnt/network_monitoring/output/{{ timestamp }}
+       path: /home/Network_Monitoring/output/{{ timestamp }}
        state: directory
        mode: '0755'
-      become: yes
-      become_method: sudo
-      become_user: semaphor
       vars:
         ansible_become_flags: ''
-
-    - name : Debug become config
-      debug:
-        msg: "Become method: {{ ansible_become_method }}, Become user: {{ ansible_become_user }}"
 
     - name: Debug directory variables
       debug:
