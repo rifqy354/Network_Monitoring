@@ -7,7 +7,7 @@
   gather_facts: no
   vars:
     # Direktori utama untuk menyimpan data
-    data_directory: "/mnt/network_monitoring/output"
+    data_directory: "/home/Network_Monitoring/output"
     # Timestamp untuk direktori unik
     current_timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
   vars_files:
