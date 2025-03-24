@@ -7,11 +7,9 @@
   gather_facts: no
   vars:
     # Direktori utama untuk menyimpan data
-    data_directory: "/home/Network_Monitoring/output"
+    data_directory: "/home/kpc/Network_Monitoring/output"
     # Timestamp untuk direktori unik
-    current_timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
-  vars_files:
-    - vault.yaml  # File untuk menyimpan variabel sensitif seperti credentials
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}"
 
   tasks:
     # 1. Inisialisasi variabel
@@ -23,7 +21,6 @@
       debug:
         msg:
          - "Data directory: {{ data_directory }}"
-         - "Current timestamp: {{ current_timestamp }}"
          - "Timestamp: {{ timestamp }}"
 
     # 2. Pastikan direktori induk ada
@@ -36,23 +33,21 @@
 
     - name: Ensure output dir exists
       file:
-       path: /home/Network_Monitoring/output/{{ timestamp }}
+       path: /home/kpc/Network_Monitoring/output/{{ timestamp }}
        state: directory
        mode: '0755'
-      vars:
-        ansible_become_flags: ''
 
     - name: Debug directory variables
       debug:
         msg:
         - "Parent directory creation: {{ parent_dir_creation }}"
         - "Data directory: {{ data_directory }}"
-        - "Current timestamp: {{ current_timestamp }}"
+        - "Timestamp: {{ timestamp }}"
 
     # 3. Buat direktori dengan timestamp
     - name: Create timestamped directory
       file:
-        path: "{{ data_directory }}/{{ current_timestamp }}"
+        path: "{{ data_directory }}/{{ timestamp }}"
         state: directory
         mode: '0755'
       register: dir_creation
@@ -61,21 +56,24 @@
       debug:
         var: dir_creation
 
-    - name: Debug current_timestamp
-      debug:
-        var: current_timestamp
+    - name: add a delay #prevent race condition
+      pause:
+        seconds: 2
 
     - name: Debug timestamped directory
       debug:
         msg:
          - "Timestamped directory creation result: {{ dir_creation }}"
-         - "Timestamped directory path: {{ data_directory }}/{{ current_timestamp }}"
+         - "Timestamped directory path: {{ data_directory }}/{{ timestamp }}"
 
     # 4. Periksa apakah direktori berhasil dibuat
     - name: Check if directory exists
       stat:
-        path: "{{ data_directory }}/{{ current_timestamp }}"
+        path: "{{ data_directory }}/{{ timestamp }}"
       register: dir_check
+      retries: 3
+      delay: 1
+      until: dir_check.stat.exists
 
     - name: Debug directory existence
       debug:
@@ -84,13 +82,14 @@
     # 5. Gagal jika direktori tidak dibuat
     - name: Fail if directory creation fails
       fail:
-        msg: "Failed to create directory {{ data_directory }}/{{ current_timestamp }}. Exists: {{ dir_check.stat.exists }}"
+       msg: "Failed to create directory {{ data_directory }}/{{ timestamp }}. Exists: {{ dir_check.stat.exists }}"
       when: not dir_check.stat.exists
+      ignore_errors: yes
 
     # 6. Debug informasi direktori
     - name: Debug directory path
       debug:
-        msg: "Data directory is {{ data_directory }}/{{ current_timestamp }}"
+        msg: "Data directory is {{ data_directory }}/{{ timestamp }}"
 
     # 7. Kumpulkan fakta dari switch
     - name: Gather facts from switches
@@ -123,6 +122,11 @@
         lines:
           - snmp-server community PUBLIC RO 90
 
+    - name: Debug switch_facts.ansible_facts
+      debug:
+        var: switch_facts.ansible_facts
+
+
     # 10. Dapatkan statistik interface termasuk CRC
     - name: Get interface statistics including CRC
       cisco.ios.ios_command:
@@ -134,13 +138,10 @@
           - show cdp neighbors detail
           - show spanning-tree
           - show version | include (Switch uptime)
-          #- show inventory
           - show processes cpu
           - show processes memory
-          #- show logging
           - show ip arp
-          #- show power
-          #- show etherchannel summary
+          - show env temperature status
       register: interface_data
 
     # 11. Debug data interface
@@ -168,36 +169,9 @@
       debug:
         var: crc_info
 
-    # 12. Export data ke file JSON
-    - name: Export raw data to JSON files
-      copy:
-        content: "{{ item.value | to_nice_json }}"
-        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ item.key }}.json"
-      delegate_to: localhost
-      loop:
-        - { key: "facts", value: "{{ switch_facts }}" }
-        - { key: "interface_data", value: "{{ interface_data }}" }
-        - { key: "crc_info", value: "{{ crc_info }}" } #tambahan CRC
-      when: dir_check.stat.exists
-
-    # 13. Buat laporan menggunakan template Jinja2
-    - name: Create interface report
+    - name: Create all-in-one report
       template:
-        src: templates/interface_report.j2
-        dest: "{{ data_directory }}/{{ timestamp | default('unknown_timestamp') }}/interface_report.txt"
-      when: dir_check.stat.exists
-
-    # 14. Buat laporan utilitas
-    - name: Create utilization report
-      template:
-        src: templates/utilization_report.j2
-        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ inventory_hostname }}_utilization_report.html"
-      when: dir_check.stat.exists
-
-    # 15. Buat laporan VLAN
-    - name: Create VLAN report
-      template:
-        src: templates/vlan_report.j2
-        dest: "{{ data_directory }}/{{ current_timestamp }}/{{ inventory_hostname }}_vlan_report.html"
+        src: templates/all.j2
+        dest: "{{ data_directory }}/{{ timestamp }}/{{ inventory_hostname }}_comprehensive_report.html"
       when: dir_check.stat.exists
 

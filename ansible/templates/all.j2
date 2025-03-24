@@ -1,0 +1,122 @@
+{# templates/all.j2 #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Network Report - {{ inventory_hostname }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333366; }
+        h2 { color: #555588; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .up { color: green; font-weight: bold; }
+        .down { color: red; font-weight: bold; }
+        .summary { background-color: #eef; padding: 10px; border-radius: 5px; }
+        .warning { background-color: #fff3cd; }
+        .critical { background-color: #f8d7da; }
+        .meter {
+            height: 20px;
+            position: relative;
+            background: #f3f3f3;
+            border-radius: 5px;
+            padding: 3px;
+            box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
+        }
+        .meter > span {
+            display: block;
+            height: 100%;
+            border-radius: 5px;
+            background-color: rgb(43,194,83);
+            box-shadow: inset 0 2px 9px rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive Network Report for {{ inventory_hostname }}</h1>
+
+    <!-- Device Summary -->
+    <div class="summary">
+        <h2>Device Summary</h2>
+        <p>Device Model: {{ switch_facts.ansible_facts.ansible_net_model }}</p>
+        <p>IOS Version: {{ switch_facts.ansible_facts.ansible_net_version }}</p>
+        <p>Uptime: {{ switch_facts.ansible_facts.ansible_net_uptime if switch_facts.ansible_facts.ansible_net_uptime is defined else 'N/A' }}</p>
+        <p>Total Interfaces: {{ switch_facts.ansible_facts.ansible_net_interfaces | length }}</p>
+        {% set up_interfaces = 0 %}
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+            {% if interface.operstatus == 'up' %}
+                {% set up_interfaces = up_interfaces + 1 %}
+            {% endif %}
+        {% endfor %}
+        <p>Interfaces Up: {{ up_interfaces }}</p>
+        <p>Interfaces Down: {{ switch_facts.ansible_facts.ansible_net_interfaces | length - up_interfaces }}</p>
+    </div>
+
+    <!-- Interface Details -->
+    <h2>Interface Details</h2>
+    <table>
+        <tr>
+            <th>Interface</th>
+            <th>Status</th>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Description</th>
+            <th>Bandwidth</th>
+            <th>Duplex</th>
+            <th>Input Rate</th>
+            <th>Output Rate</th>
+            <th>Input Errors</th>
+            <th>CRC Errors</th>
+        </tr>
+        {% for name, interface in switch_facts.ansible_facts.ansible_net_interfaces.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td class="{{ interface.operstatus }}">{{ interface.operstatus }}</td>
+            <td>{{ interface.ipv4[0].address if interface.ipv4 is defined and interface.ipv4|length > 0 else 'N/A' }}</td>
+            <td>{{ interface.macaddress if interface.macaddress is defined else 'N/A' }}</td>
+            <td>{{ interface.description if interface.description is defined else '' }}</td>
+            <td>{{ interface.bandwidth if interface.bandwidth is defined else 'N/A' }}</td>
+            <td>{{ interface.duplex if interface.duplex is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.input_rate if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.output_rate if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.input_errors if interface.counters is defined else 'N/A' }}</td>
+            <td>{{ interface.counters.crc_errors if interface.counters is defined else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- VLAN Information -->
+    <h2>VLAN Information</h2>
+    <pre>{{ interface_data.stdout[3] if interface_data.stdout[3] is defined else 'No VLAN data available' }}</pre>
+
+    <!-- CDP Neighbors -->
+    <h2>CDP Neighbors</h2>
+    <pre>{{ interface_data.stdout[4] if interface_data.stdout[4] is defined else 'No CDP data available' }}</pre>
+
+    <!-- CPU Utilization -->
+    <h2>CPU Utilization</h2>
+    <pre>{{ interface_data.stdout[7] if interface_data.stdout[7] is defined else 'No CPU data available' }}</pre>
+
+    <!-- Memory Utilization -->
+    <h2>Memory Utilization</h2>
+    <pre>{{ interface_data.stdout[8] if interface_data.stdout[8] is defined else 'No memory data available' }}</pre>
+
+    <!-- ARP Table -->
+    <h2>ARP Table</h2>
+    <pre>{{ interface_data.stdout[9] if interface_data.stdout[9] is defined else 'No ARP data available' }}</pre>
+
+    <!-- Environmental Status -->
+    <h2>Environmental Status</h2>
+    <pre>{{ interface_data.stdout[10] if interface_data.stdout[10] is defined else 'No environmental data available' }}</pre>
+
+    <!-- Footer -->
+    <footer>
+        <p>Report generated on: {{ timestamp }}</p>
+    </footer>
+</body>
+</html>

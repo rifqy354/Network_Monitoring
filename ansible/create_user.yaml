@@ -1,0 +1,19 @@
+---
+- name: Configure local users on Cisco IOS devices
+  hosts: all  # Grup perangkat yang ditargetkan (sesuaikan dengan inventaris Anda)
+  gather_facts: no
+  connection: network_cli
+
+  tasks:
+    - name: Create user 'kpc' with secret 'administrator'
+      cisco.ios.ios_user:
+        name: kpc
+        configured_password: administrator
+        password_type: secret
+        privilege: 15
+        state: present
+      register: result
+
+    - name: Debug output
+      debug:
+        var: result
